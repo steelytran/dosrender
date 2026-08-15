@@ -13,7 +13,8 @@ src/obj/input.obj \
 src/obj/draw.obj \
 src/obj/main.obj \
 src/obj/vsync.obj \
-src/obj/common.obj
+src/obj/common.obj \
+src/obj/timer.obj
 
 .PHONY: all clean
 .SUFFIXES: .obj .c. .s
