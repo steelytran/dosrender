@@ -5,7 +5,7 @@
 #include "common.h"
 
 Intvect
-*setivt(uint8_t n, void __interrupt __far *isr)
+*setvect(uint8_t n, void __interrupt __far *isr)
 {
 	Intvect *newp;
 
@@ -18,6 +18,16 @@ Intvect
 
 	_dos_setvect(n, isr);
 
+	return newp;
+}
+
+Intvect
+*insertivt(Intvect* list, Intvect* newp)
+{
+	if (newp == NULL)
+		return newp;
+
+	newp->next = list;
 	return newp;
 }
 

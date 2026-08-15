@@ -79,7 +79,7 @@
 #define K_DOWN 0x50
 #define K_RIGHT 0x4D
 
-extern void __interrupt __far isr09h(void);
+extern void __interrupt __far IRQ1_handler(void);
 
 extern volatile uint8_t far keystate[];
 

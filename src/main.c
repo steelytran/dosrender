@@ -24,7 +24,8 @@
 #include "graphics.h"
 #include "input.h"
 
-extern void __interrupt __far isr09h(void);
+extern void __interrupt __far IRQ0_handler(void);
+extern void __interrupt __far IRQ1_handler(void);
 
 void
 quit(int e)
@@ -46,13 +47,20 @@ uint8_t *VBUF;
 Intvect *vect_table = NULL;
 
 extern volatile uint8_t far keystate[];
+extern volatile uint16_t far timer_ms;
 
 int
 main(int argc, char *argv[])
 {
 	int i;
 
-	vect_table = setivt(0x09, isr09h);
+	vect_table = setvect(0x09, IRQ1_handler);
+	if (vect_table == NULL) {
+		fprintf(stderr, "Could not allocate IVT buffer.\n");
+		quit(1);
+	}
+
+	vect_table = insertivt(vect_table, setvect(0x08, IRQ0_handler));
 	if (vect_table == NULL) {
 		fprintf(stderr, "Could not allocate IVT buffer.\n");
 		quit(1);
@@ -71,7 +79,7 @@ main(int argc, char *argv[])
 	while (!keystate[K_ESC]) {
 		memset(VBUF, 0, 64000);
 
-		line(0, 0, 50, 50, RED);
+		line(0, 0, 50, 50, (uint8_t)timer_ms);
 
 		wait_for_vsync();
 		_fmemcpy(VGA, VBUF, 64000);
