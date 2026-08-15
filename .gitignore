@@ -1,0 +1,5 @@
+src/obj/
+bin/
+*.obj
+*.err
+.DS_Store
