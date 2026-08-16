@@ -52,13 +52,6 @@ main(int argc, char *argv[])
 {
 	int i;
 
-	vect_table = setvect(0x09, IRQ1_handler);
-	if (vect_table == NULL) {
-		fprintf(stderr, "Could not allocate IVT buffer.\n");
-		cleanup();
-		exit(1);
-	}
-
 	vect_table = insertivt(vect_table, setvect(0x08, IRQ0_handler));
 	if (vect_table == NULL) {
 		fprintf(stderr, "Could not allocate IVT buffer.\n");
@@ -66,8 +59,15 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	VGA = (uint8_t far *) 0xa0000000;
-	VBUF = (uint8_t *) malloc(64000);
+	vect_table = setvect(0x09, IRQ1_handler);
+	if (vect_table == NULL) {
+		fprintf(stderr, "Could not allocate IVT buffer.\n");
+		cleanup();
+		exit(1);
+	}
+
+	VGA = (uint8_t far *)0xa0000000;
+	VBUF = (uint8_t *)malloc(64000);
 	if (VBUF == NULL) {
 		fprintf(stderr, "Could not allocate video memory.\n");
 		cleanup();
@@ -75,12 +75,13 @@ main(int argc, char *argv[])
 	}
 
 	init_tables();
+	init_PIT(18643);	/* ~64hz */
 	vga_mode(0x13);
 
 	while (!keystate[K_ESC]) {
 		memset(VBUF, 0, 64000);
 
-		line(0, 0, 50, 50, (uint8_t) timer_ms);
+		line(0, 0, 50, 50, WHITE);
 
 		wait_for_vsync();
 		_fmemcpy(VGA, VBUF, 64000);

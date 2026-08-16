@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2026 https://github.com/steelytran
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -25,7 +25,7 @@ Intvect
 * setvect(uint8_t n, void __interrupt __far * isr){
 	Intvect *newp;
 
-	newp = (Intvect *) malloc(sizeof(Intvect));
+	newp = (Intvect *)malloc(sizeof(Intvect));
 	if (newp == NULL)
 		return newp;
 

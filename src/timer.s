@@ -21,10 +21,25 @@
 	_timer_ms dw 0
 
 .code
-;; 	public init_PIT_
-;; init_PIT_ proc far
-;; 	ret
-;; init_PIT_ endp
+	public init_PIT_
+init_PIT_ proc far
+	push ax
+
+	cli
+
+	mov al, 36h
+	out 43h, al
+
+	pop ax
+
+	out 40h, al
+	mov al, ah
+	out 40h, al
+
+	sti
+
+	ret
+init_PIT_ endp
 
 	public IRQ0_handler_
 IRQ0_handler_ proc far

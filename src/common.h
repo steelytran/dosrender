@@ -39,6 +39,7 @@ void restoreivt(Intvect *);
 extern Intvect * vect_table;
 
 extern void __interrupt __far IRQ0_handler(void);
+extern void __far init_PIT(uint16_t);
 
 extern volatile uint16_t far timer_ms;
 
