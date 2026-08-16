@@ -30,11 +30,11 @@ extern void far wait_for_vsync(void);
 void vga_mode(uint8_t);
 void pixel(int, int, uint8_t);
 void line(int, int, int, int, uint8_t);
-void polygon(int*, int, uint8_t);
+void polygon(int *, int, uint8_t);
 void rect(int, int, int, int, uint8_t);
 void circle(int, int, int, uint8_t);
 
-extern uint8_t far *VGA;
-extern uint8_t *VBUF;
+extern uint8_t far * VGA;
+extern uint8_t * VBUF;
 
 #endif

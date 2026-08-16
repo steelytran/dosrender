@@ -101,10 +101,10 @@ polygon(int *vertices, int n, uint8_t color)
 		line(x1, y1, x2, y2, color);
 	}
 	x1 = vertices[0],
-	y1 = vertices[1],
-	x2 = vertices[(n << 1) - 2],
-	y2 = vertices[(n << 1) - 1],
-	line(x1, y1, x2, y2, color);
+		y1 = vertices[1],
+		x2 = vertices[(n << 1) - 2],
+		y2 = vertices[(n << 1) - 1],
+		line(x1, y1, x2, y2, color);
 }
 
 void

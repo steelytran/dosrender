@@ -21,10 +21,10 @@
 	_timer_ms dw 0
 
 .code
-	public init_PIT_
-init_PIT_ proc far
-	ret
-init_PIT_ endp
+;; 	public init_PIT_
+;; init_PIT_ proc far
+;; 	ret
+;; init_PIT_ endp
 
 	public IRQ0_handler_
 IRQ0_handler_ proc far

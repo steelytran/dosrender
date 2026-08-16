@@ -10,16 +10,16 @@
 typedef struct Intvect Intvect;
 struct Intvect {
 	uint8_t n;
-	void __interrupt __far *isr;
+	void __interrupt __far * isr;
 	Intvect *next;
 };
 
 void init_tables(void);
 
-Intvect *setvect(uint8_t, void __interrupt __far*);
-Intvect *insertivt(Intvect*, Intvect*);
-void restoreivt(Intvect*);
-extern Intvect *vect_table;
+Intvect *setvect(uint8_t, void __interrupt __far *);
+Intvect *insertivt(Intvect *, Intvect *);
+void restoreivt(Intvect *);
+extern Intvect * vect_table;
 
 extern void __interrupt __far IRQ0_handler(void);
 
