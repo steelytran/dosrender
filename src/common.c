@@ -5,11 +5,10 @@
 #include "common.h"
 
 Intvect
-*setvect(uint8_t n, void __interrupt __far *isr)
-{
+* setvect(uint8_t n, void __interrupt __far * isr){
 	Intvect *newp;
 
-	newp = (Intvect*)malloc(sizeof(Intvect));
+	newp = (Intvect *) malloc(sizeof(Intvect));
 	if (newp == NULL)
 		return newp;
 
@@ -22,8 +21,7 @@ Intvect
 }
 
 Intvect
-*insertivt(Intvect* list, Intvect* newp)
-{
+* insertivt(Intvect * list, Intvect * newp) {
 	if (newp == NULL)
 		return newp;
 
@@ -32,10 +30,17 @@ Intvect
 }
 
 void
-restoreivt(Intvect *ivt)
+restoreivt(Intvect * ivt)
 {
-	for (; ivt->next != NULL; ivt = ivt->next) {
+	Intvect *nextp;
+
+	while (ivt != NULL) {
 		_dos_setvect(ivt->n, ivt->isr);
+
+		nextp = ivt->next;
+
+		free(ivt);
+
+		ivt = nextp;
 	}
-	_dos_setvect(ivt->n, ivt->isr);
 }
