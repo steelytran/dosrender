@@ -5,7 +5,7 @@ LD=wlink
 export WATCOM=/usr/local/src/open-watcom-v2/rel
 INCLUDE=$(WATCOM)/h
 
-CFLAGS=-os -d0 -ml -i=$(INCLUDE)
+CFLAGS=-os -d2 -ml -q -i=$(INCLUDE)
 LDFLAGS=sys dos
 
 OBJS=\
