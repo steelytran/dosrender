@@ -19,6 +19,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "graphics.h"
 #include "common.h"
@@ -30,6 +32,8 @@ void line(int, int, int, int, uint8_t);
 void polygon(int *, int, uint8_t);
 void rect(int, int, int, int, uint8_t);
 void circle(int, int, int, uint8_t);
+uint8_t *loadimage(const char * , int, int);
+void drawimage(uint8_t * , int, int, int, int);
 
 extern uint8_t * VBUF;
 
@@ -176,5 +180,44 @@ circle(int x, int y, int radius, uint8_t color)
 		VBUF[offset + dy + dxoffset] = color;
 		n += invradius;
 		dy = (int)((radius * SIN_ACOS[(int)(n >> 6)]) >> 16);
+	}
+}
+
+
+uint8_t *
+loadimage(const char *path, int w, int h)
+{
+	uint8_t *mem;
+	FILE *image;
+
+	image = fopen(path, "rb");
+	if (image == NULL)
+		return NULL;
+
+	/* TODO: DETERMINE FILE SIZE */
+
+	mem = (uint8_t *)malloc(w * h);
+	if (mem == NULL)
+		return mem;
+
+	fread(mem, 1, w * h, image);
+
+	fclose(image);
+
+	return mem;
+}
+
+void
+drawimage(uint8_t *image, int w, int h, int x, int y)
+{
+	int i;
+	int dy = 0;
+
+	uint8_t *screen = &VBUF[(y << 8) + (y << 6) + x];
+
+	for (i = 0; i < h; i++) {
+		memcpy(screen, image, w);
+		screen += SCREEN_WIDTH;
+		image += w;
 	}
 }

@@ -9,12 +9,12 @@ CFLAGS=-os -d2 -ml -q -i=$(INCLUDE)
 LDFLAGS=sys dos
 
 OBJS=\
-src/obj/input.obj \
-src/obj/draw.obj \
-src/obj/main.obj \
-src/obj/vsync.obj \
-src/obj/common.obj \
-src/obj/timer.obj
+src/obj/input.s.obj \
+src/obj/draw.c.obj \
+src/obj/main.c.obj \
+src/obj/common.c.obj \
+src/obj/timer.s.obj \
+src/obj/draw.s.obj
 
 .PHONY: all clean
 .SUFFIXES: .obj .c. .s
@@ -22,10 +22,10 @@ src/obj/timer.obj
 all: $(OBJS)
 	$(LD) $(LDFLAGS) name bin/a.exe file { $(OBJS) }
 
-src/obj/%.obj: src/%.c
+src/obj/%.c.obj: src/%.c
 	$(CC) $(CFLAGS) -fo=$@ $<
 
-src/obj/%.obj: src/%.s
+src/obj/%.s.obj: src/%.s
 	$(AS) -fo=$@ $<
 
 clean:
