@@ -52,14 +52,14 @@ main(int argc, char *argv[])
 {
 	int i;
 
-	vect_table = insertivt(vect_table, setvect(0x08, IRQ0_handler));
+	vect_table = setvect(0x08, IRQ0_handler);
 	if (vect_table == NULL) {
 		fprintf(stderr, "Could not allocate IVT buffer.\n");
 		cleanup();
 		exit(1);
 	}
 
-	vect_table = setvect(0x09, IRQ1_handler);
+	vect_table = insertivt(vect_table, setvect(0x09, IRQ1_handler));
 	if (vect_table == NULL) {
 		fprintf(stderr, "Could not allocate IVT buffer.\n");
 		cleanup();
