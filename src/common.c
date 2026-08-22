@@ -21,8 +21,24 @@
 
 #include "common.h"
 
+int
+dpmi_lock_memory(void *p, size_t s)
+{
+	union REGS r;
+	uint32_t addr = (uint8_t)p;
+
+	r.w.ax = 0x0600;
+	r.w.bx = addr >> 16;
+	r.w.cx = addr & 0xFFFF;
+	r.w.si = s >> 16;
+	r.w.di = s & 0xFFFF;
+	int386(0x31, &r, &r);
+
+	return r.w.cflag;
+}
+
 Intvect
-* setvect(uint8_t n, void __interrupt __far * isr){
+* setvect(uint8_t n, void __interrupt * isr){
 	Intvect *newp;
 
 	newp = (Intvect *)malloc(sizeof(Intvect));

@@ -27,21 +27,22 @@
 typedef struct Intvect Intvect;
 struct Intvect {
 	uint8_t n;
-	void __interrupt __far * isr;
+	void __interrupt * isr;
 	Intvect *next;
 };
 
 void init_tables(void);
 
-Intvect *setvect(uint8_t, void __interrupt __far *);
+int dpmi_lock_memory(void *, size_t);
+Intvect *setvect(uint8_t, void __interrupt *);
 Intvect *insertivt(Intvect *, Intvect *);
 void restoreivt(Intvect *);
 extern Intvect * vect_table;
 
-extern void __interrupt __far IRQ0_handler(void);
-extern void __far init_PIT(uint16_t);
+extern void __interrupt IRQ0_handler(void);
+extern void init_PIT(uint32_t);
 
-extern volatile uint16_t far timer_ms;
+extern volatile uint32_t timer_ms;
 
 extern float SIN[360];
 extern float COS[360];

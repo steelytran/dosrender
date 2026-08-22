@@ -14,28 +14,24 @@
 ; You should have received a copy of the GNU General Public License along
 ; with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-.model large
+.386p
+.model flat
 
 .code
 	public wait_for_vsync_
-wait_for_vsync_ proc far
-	push ax
-	push dx
-
+wait_for_vsync_ proc
 	mov dx, 03dah
 
 trace_end:
-	in ax, dx
-	test ax, 08h
+	in al, dx
+	test al, 08h
 	jnz trace_end
 
 trace_start:
-	in ax, dx
-	test ax, 08h
+	in al, dx
+	test al, 08h
 	jz trace_start
 
-	pop dx
-	pop ax
 	ret
 wait_for_vsync_ endp
 end

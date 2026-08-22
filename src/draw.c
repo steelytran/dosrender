@@ -19,6 +19,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "graphics.h"
 #include "common.h"
@@ -30,6 +32,8 @@ void line(int, int, int, int, uint8_t);
 void polygon(int *, int, uint8_t);
 void rect(int, int, int, int, uint8_t);
 void circle(int, int, int, uint8_t);
+uint8_t *loadimage(const char * , int, int);
+void drawimage(uint8_t * , int, int, int, int);
 
 extern uint8_t * VBUF;
 
@@ -55,7 +59,7 @@ vga_mode(uint8_t mode)
 {
 	union REGS regs;
 	regs.w.ax = mode;
-	int86(0x10, &regs, &regs);
+	int386(0x10, &regs, &regs);
 }
 
 void
@@ -176,5 +180,65 @@ circle(int x, int y, int radius, uint8_t color)
 		VBUF[offset + dy + dxoffset] = color;
 		n += invradius;
 		dy = (int)((radius * SIN_ACOS[(int)(n >> 6)]) >> 16);
+	}
+}
+
+
+uint8_t *
+loadimage(const char *path, int w, int h)
+{
+	uint8_t *mem;
+	FILE *image;
+
+	image = fopen(path, "rb");
+	if (image == NULL)
+		return NULL;
+
+	/* TODO: DETERMINE FILE SIZE */
+
+	mem = (uint8_t *)malloc(w * h);
+	if (mem == NULL)
+		return mem;
+
+	fread(mem, 1, w * h, image);
+
+	fclose(image);
+
+	return mem;
+}
+
+void
+drawimage(uint8_t *image, int w, int h, int x, int y)
+{
+	int i;
+	uint8_t *screen;
+	int original_w = w;
+
+	if (x >= SCREEN_WIDTH || x + w < 0 || y >= SCREEN_HEIGHT || y + h < 0)
+		return;
+
+	if (x < 0) {
+		image -= x;
+		w += x;
+		x = 0;
+	}
+
+	if (y < 0) {
+		image -= y * original_w;
+		h += y;
+		y = 0;
+	}
+	if (x + w >= SCREEN_WIDTH)
+		w = SCREEN_WIDTH - x;
+
+	if (y + h >= SCREEN_HEIGHT)
+		h = SCREEN_HEIGHT - y;
+
+	screen = &VBUF[(y << 8) + (y << 6) + x];
+
+	for (i = 0; i < h; i++) {
+		memcpy(screen, image, w);
+		screen += SCREEN_WIDTH;
+		image += original_w;
 	}
 }
