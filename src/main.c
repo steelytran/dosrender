@@ -27,18 +27,6 @@
 extern void __interrupt IRQ0_handler(void);
 extern void __interrupt IRQ1_handler(void);
 
-void
-cleanup(void)
-{
-	int i;
-	if (VBUF != NULL)
-		free(VBUF);
-
-	restoreivt(vect_table);
-
-	vga_mode(0x03);
-}
-
 uint8_t *VGA;
 uint8_t *VBUF;
 
@@ -58,59 +46,42 @@ int
 main(void)
 {
 	int i;
+	int status = 0;;
 	uint8_t *image;
 	Player pos = {0, 0};
 
-	if (dpmi_lock_memory((void *)&timer_ms, sizeof(uint32_t)) != 0) {
-		cleanup();
-		fprintf(stderr, "ERROR.\n");
-		exit(1);
-	}
+	if (dpmi_lock_memory((void *)&timer_ms, sizeof(uint32_t)) != 0)
+		return 1;
 
-	if (dpmi_lock_memory((void *)IRQ0_handler, IRQ0_handler_size) != 0) {
-		cleanup();
-		fprintf(stderr, "ERROR.\n");
-		exit(1);
-	}
+	if (dpmi_lock_memory((void *)IRQ0_handler, IRQ0_handler_size) != 0)
+		return 1;
 
-	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0) {
-		cleanup();
-		fprintf(stderr, "ERROR.\n");
-		exit(1);
-	}
+	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0)
+		return 1;
 
-	if (dpmi_lock_memory((void *)IRQ1_handler, IRQ1_handler_size) != 0) {
-		cleanup();
-		fprintf(stderr, "ERROR.\n");
-		exit(1);
-	}
+	if (dpmi_lock_memory((void *)IRQ1_handler, IRQ1_handler_size) != 0)
+		return 1;
 
-	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0) {
-		cleanup();
-		fprintf(stderr, "ERROR.\n");
-		exit(1);
-	}
+	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0)
+		return 1;
 
 	vect_table = setvect(0x08, IRQ0_handler);
 	if (vect_table == NULL) {
-		cleanup();
-		fprintf(stderr, "Could not allocate IVT buffer.\n");
-		exit(1);
+		status = -1;
+		goto cleanup;
 	}
 
 	vect_table = insertivt(vect_table, setvect(0x09, IRQ1_handler));
 	if (vect_table == NULL) {
-		cleanup();
-		fprintf(stderr, "Could not allocate IVT buffer.\n");
-		exit(1);
+		status = -1;
+		goto cleanup;
 	}
 
 	VGA = (uint8_t *)0xa0000;
 	VBUF = (uint8_t *)malloc(64000);
 	if (VBUF == NULL) {
-		cleanup();
-		fprintf(stderr, "Could not allocate video memory.\n");
-		exit(1);
+		status = -1;
+		goto cleanup;
 	}
 
 	init_tables();
@@ -119,14 +90,13 @@ main(void)
 
 	image = loadimage("uv.128", 128, 128);
 	if (image == NULL) {
-		cleanup();
-		fprintf(stderr, "Could not load texture.\n");
-		exit(1);
+		status = -1;
+		goto cleanup;
 	}
 
-	memset(VBUF, 0, 64000);
-
 	while (!keystate[K_ESC]) {
+		memset(VBUF, 0, 64000);
+
 		pos.y -= keystate[K_W];
 		pos.x -= keystate[K_A];
 		pos.y += keystate[K_S];
@@ -136,11 +106,13 @@ main(void)
 
 		wait_for_vsync();
 		memcpy(VGA, VBUF, 64000);
-		memset(VBUF, 0, 64000);
 	}
 
+cleanup:
 	free(image);
+	free(VBUF);
+	restoreivt(vect_table);
+	vga_mode(0x03);
 
-	cleanup();
-	return 0;
+	return status;
 }

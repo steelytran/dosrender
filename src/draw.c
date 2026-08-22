@@ -25,15 +25,15 @@
 #include "graphics.h"
 #include "common.h"
 
-void vga_mode(uint8_t);
+void vga_mode(uint8_t mode);
 void init_tables();
-void pixel(int, int, uint8_t);
-void line(int, int, int, int, uint8_t);
-void polygon(int *, int, uint8_t);
-void rect(int, int, int, int, uint8_t);
-void circle(int, int, int, uint8_t);
-uint8_t *loadimage(const char * , int, int);
-void drawimage(uint8_t * , int, int, int, int);
+void pixel(int x, int y, uint8_t color);
+void line(int x1, int y1, int x2, int y2, uint8_t color);
+void polygon(int *vertices, int n, uint8_t color);
+void rect(int x1, int y1, int x2, int y2, uint8_t color);
+void circle(int x, int y, int radius, uint8_t color);
+uint8_t *loadimage(const char *path, int w, int h);
+void drawimage(uint8_t *image, int w, int h, int x, int y);
 
 extern uint8_t * VBUF;
 
