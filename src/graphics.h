@@ -42,9 +42,9 @@ enum {
 	WHITE
 };
 
-extern void far wait_for_vsync(void);
-extern void far clearbuffer(uint8_t *);
-extern void far bufferswap(uint8_t *);
+extern void wait_for_vsync(void);
+extern void clearbuffer(uint8_t *);
+extern void bufferswap(uint8_t *);
 
 void vga_mode(uint8_t);
 void pixel(int, int, uint8_t);
@@ -55,7 +55,7 @@ void circle(int, int, int, uint8_t);
 uint8_t *loadimage(const char * , int, int);
 void drawimage(uint8_t * , int, int, int, int);
 
-extern uint8_t far * VGA;
+extern uint8_t * VGA;
 extern uint8_t * VBUF;
 
 #endif
