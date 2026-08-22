@@ -56,9 +56,6 @@ main(void)
 	if (dpmi_lock_memory((void *)IRQ0_handler, IRQ0_handler_size) != 0)
 		return 1;
 
-	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0)
-		return 1;
-
 	if (dpmi_lock_memory((void *)IRQ1_handler, IRQ1_handler_size) != 0)
 		return 1;
 
