@@ -1,20 +1,20 @@
-CC=wcc
+CC=wcc386
 AS=wasm
 LD=wlink
 
 export WATCOM=/usr/local/src/open-watcom-v2/rel
 INCLUDE=$(WATCOM)/h
 
-CFLAGS=-os -d2 -ml -q -i=$(INCLUDE)
-LDFLAGS=sys dos
+CFLAGS=-os -d2 -q -3r -i=$(INCLUDE)
+LDFLAGS=sys dos32a
 
 OBJS=\
-src/obj/input.s.obj \
 src/obj/draw.c.obj \
 src/obj/main.c.obj \
 src/obj/common.c.obj \
+src/obj/input.s.obj \
+src/obj/draw.s.obj \
 src/obj/timer.s.obj \
-src/obj/draw.s.obj
 
 .PHONY: all clean
 .SUFFIXES: .obj .c. .s

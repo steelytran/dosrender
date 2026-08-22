@@ -14,23 +14,27 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  if not, see <http://www.gnu.org/licenses/>.
 
-.model large
+.386p
+.model flat
 
 .data
 	public _timer_ms
-	_timer_ms dw 0
+	_timer_ms dd 0
+
+	public _IRQ0_handler_size
+	_IRQ0_handler_size dd IRQ0_handler_end - IRQ0_handler_
 
 .code
 	public init_PIT_
-init_PIT_ proc far
-	push ax
+init_PIT_ proc
+	push eax
 
 	cli
 
 	mov al, 36h
 	out 43h, al
 
-	pop ax
+	pop eax
 
 	out 40h, al
 	mov al, ah
@@ -42,20 +46,16 @@ init_PIT_ proc far
 init_PIT_ endp
 
 	public IRQ0_handler_
-IRQ0_handler_ proc far
+IRQ0_handler_ proc
 	push ax
-	push ds
 
-	mov ax, @data
-	mov ds, ax
-
-	inc word ptr [_timer_ms]
+	inc dword ptr [_timer_ms]
 
 	mov al, 20h
 	out 20h, al
 
-	pop ds
 	pop ax
-	iret
+	iretd
 IRQ0_handler_ endp
+IRQ0_handler_end:
 	end
