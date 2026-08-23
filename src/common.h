@@ -19,10 +19,14 @@
 #define COMMON_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define sgn(x) ((x) < 0 ? - 1 : ((x) > 0 ? 1 : 0))
 
 #define PI 3.14159f
+
+#define FP_FACTOR 12
+#define FP_SCALE (1 << FP_FACTOR)
 
 typedef struct Intvect Intvect;
 struct Intvect {
@@ -30,6 +34,15 @@ struct Intvect {
 	void __interrupt * isr;
 	Intvect *next;
 };
+
+typedef struct {
+	int32_t x;
+	int32_t y;
+	int32_t z;
+	int32_t angle;
+} Player;
+
+extern Player pov;
 
 void init_tables(void);
 

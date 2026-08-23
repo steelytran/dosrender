@@ -28,7 +28,7 @@ extern void __interrupt IRQ0_handler(void);
 extern void __interrupt IRQ1_handler(void);
 
 uint8_t *VGA;
-uint8_t *VBUF;
+uint8_t *VBUF = NULL;
 
 Intvect *vect_table = NULL;
 
@@ -37,18 +37,19 @@ extern size_t IRQ1_handler_size;
 extern size_t IRQ0_handler_size;
 extern volatile uint32_t timer_ms;
 
-typedef struct {
-	int x;
-	int y;
-} Player;
+Player pov = {0, 0, 0, 0};
 
 int
 main(void)
 {
-	int i;
-	int status = 0;;
-	uint8_t *image;
-	Player pos = {0, 0};
+	int status = 0;
+	uint8_t *image = NULL;
+	Vertex triangle_s[3];
+	Vertex triangle[] = {
+		{30, 50, 0},
+		{10, 190, 0},
+		{270, 60, 0}
+	};
 
 	if (dpmi_lock_memory((void *)&timer_ms, sizeof(uint32_t)) != 0)
 		return 1;
@@ -94,22 +95,67 @@ main(void)
 	while (!keystate[K_ESC]) {
 		memset(VBUF, 0, 64000);
 
-		pos.y -= keystate[K_W];
-		pos.x -= keystate[K_A];
-		pos.y += keystate[K_S];
-		pos.x += keystate[K_D];
+		pov.angle -= keystate[K_RIGHT];
+		pov.angle += keystate[K_LEFT];
+		pov.angle %= 360;
+		if (pov.angle < 0)
+			pov.angle = 359;
 
-		drawimage(image, 128, 128, pos.x, pos.y);
+		if (keystate[K_W]) {
+			pov.y -= (int32_t)(COS[pov.angle] * FP_SCALE * 2);
+			pov.x -= (int32_t)(SIN[pov.angle] * FP_SCALE * 2);
+		}
+		if (keystate[K_A]) {
+			pov.y -= (int32_t)(COS[(pov.angle + 90) % 360] * FP_SCALE * 2);
+			pov.x -= (int32_t)(SIN[(pov.angle + 90) % 360] * FP_SCALE * 2);
+		}
+		if (keystate[K_S]) {
+			pov.y += (int32_t)(COS[pov.angle] * FP_SCALE * 2);
+			pov.x += (int32_t)(SIN[pov.angle] * FP_SCALE * 2);
+		}
+		if (keystate[K_D]) {
+			pov.y += (int32_t)(COS[(pov.angle + 90) % 360] * FP_SCALE * 2);
+			pov.x += (int32_t)(SIN[(pov.angle + 90) % 360] * FP_SCALE * 2);
+		}
+
+		triangle_s[0] = rotate2d(&triangle[0]);
+		triangle_s[1] = rotate2d(&triangle[1]);
+		triangle_s[2] = rotate2d(&triangle[2]);
+
+
+		line(
+			triangle_s[0].x,
+			triangle_s[0].y,
+			triangle_s[1].x,
+			triangle_s[1].y, 
+			WHITE
+		);
+		line(
+			triangle_s[1].x,
+			triangle_s[1].y, 
+			triangle_s[2].x,
+			triangle_s[2].y,
+			WHITE
+		);
+		line(
+			triangle_s[2].x,
+			triangle_s[2].y,
+			triangle_s[0].x,
+			triangle_s[0].y,
+			WHITE
+		);
+
+		pixel(160, 100, CYAN);
 
 		wait_for_vsync();
 		memcpy(VGA, VBUF, 64000);
 	}
 
 cleanup:
+	vga_mode(0x03);
+	restoreivt(vect_table);
 	free(image);
 	free(VBUF);
-	restoreivt(vect_table);
-	vga_mode(0x03);
 
 	return status;
 }

@@ -5,12 +5,13 @@ LD=wlink
 export WATCOM=/usr/local/src/open-watcom-v2/rel
 INCLUDE=$(WATCOM)/h
 
-CFLAGS=-os -d2 -q -3r -i=$(INCLUDE)
+CFLAGS=-os -d2 -3r -wx -i=$(INCLUDE)
 LDFLAGS=sys dos32a
 
 OBJS=\
-src/obj/draw.c.obj \
 src/obj/main.c.obj \
+src/obj/draw.c.obj \
+src/obj/render.c.obj \
 src/obj/common.c.obj \
 src/obj/input.s.obj \
 src/obj/draw.s.obj \
