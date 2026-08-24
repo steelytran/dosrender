@@ -20,22 +20,27 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <pc.h>
+#include <go32.h>
+#include <dpmi.h>
+#include <sys/movedata.h>
+
 #include "common.h"
 #include "graphics.h"
 #include "input.h"
 
-extern void __interrupt IRQ0_handler(void);
-extern void __interrupt IRQ1_handler(void);
-
-uint8_t *VGA;
-uint8_t *VBUF = NULL;
+extern void IRQ1_handler(void);
+extern void IRQ0_handler(void);
 
 Intvect *vect_table = NULL;
 
-extern volatile uint8_t keystate[128];
 extern size_t IRQ1_handler_size;
 extern size_t IRQ0_handler_size;
+
+extern volatile uint8_t keystate[128];
 extern volatile uint32_t timer_ms;
+
+uint8_t *VBUF = NULL;
 
 Player pov = {0, 0, 0, 0};
 
@@ -51,17 +56,22 @@ main(void)
 		{270, 60, 0}
 	};
 
-	if (dpmi_lock_memory((void *)&timer_ms, sizeof(uint32_t)) != 0)
-		return 1;
-
-	if (dpmi_lock_memory((void *)IRQ0_handler, IRQ0_handler_size) != 0)
-		return 1;
-
-	if (dpmi_lock_memory((void *)IRQ1_handler, IRQ1_handler_size) != 0)
-		return 1;
-
-	if (dpmi_lock_memory((void *)keystate, sizeof(uint8_t) * 128) != 0)
-		return 1;
+	if (_go32_dpmi_lock_data((void *)keystate, sizeof(uint8_t) * 128) < 0) {
+		fprintf(stderr, "ERROR: Could not lock memory for keystate\n");
+		return -1;
+	}
+	if (_go32_dpmi_lock_code((void *)IRQ1_handler, IRQ1_handler_size) < 0) {
+		fprintf(stderr, "ERROR: Could not lock memory for key handler\n");
+		return -1;
+	}
+	if (_go32_dpmi_lock_data((void *)&timer_ms, sizeof(uint32_t)) < 0) {
+		fprintf(stderr, "ERROR: Could not lock memory for timer\n");
+		return -1;
+	}
+	if (_go32_dpmi_lock_code((void *)IRQ0_handler, IRQ0_handler_size) < 0) {
+		fprintf(stderr, "ERROR: Could not lock memory timer handler\n");
+		return -1;
+	}
 
 	vect_table = setvect(0x08, IRQ0_handler);
 	if (vect_table == NULL) {
@@ -75,8 +85,8 @@ main(void)
 		goto cleanup;
 	}
 
-	VGA = (uint8_t *)0xa0000;
-	VBUF = (uint8_t *)malloc(64000);
+
+	VBUF = malloc(64000);
 	if (VBUF == NULL) {
 		status = -1;
 		goto cleanup;
@@ -85,12 +95,6 @@ main(void)
 	init_tables();
 	init_PIT(18643);	/* ~64hz */
 	vga_mode(0x13);
-
-	image = loadimage("uv.128", 128, 128);
-	if (image == NULL) {
-		status = -1;
-		goto cleanup;
-	}
 
 	while (!keystate[K_ESC]) {
 		memset(VBUF, 0, 64000);
@@ -147,15 +151,16 @@ main(void)
 
 		pixel(160, 100, CYAN);
 
-		wait_for_vsync();
-		memcpy(VGA, VBUF, 64000);
+		while (inportb(0x03da) & 0x08);
+		while (!(inportb(0x03da) & 0x08));
+
+		_movedatal(_my_ds(), (unsigned)VBUF, _dos_ds, 0xa0000, 16000);
 	}
 
 cleanup:
-	vga_mode(0x03);
 	restoreivt(vect_table);
 	free(image);
 	free(VBUF);
-
+	vga_mode(0x03);
 	return status;
 }

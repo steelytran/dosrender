@@ -1,33 +1,31 @@
-CC=wcc386
-AS=wasm
-LD=wlink
+DJGPP=/usr/local/djgpp/bin/i586-pc-msdosdjgpp
 
-export WATCOM=/usr/local/src/open-watcom-v2/rel
-INCLUDE=$(WATCOM)/h
+CC = $(DJGPP)-gcc
+AS = $(DJGPP)-gcc
+LD = $(DJGPP)-gcc
 
-CFLAGS=-os -d2 -3r -wx -i=$(INCLUDE)
-LDFLAGS=sys dos32a
+CFLAGS = -O1
+LDFLAGS =
 
-OBJS=\
+OBJS =\
 src/obj/main.c.obj \
 src/obj/draw.c.obj \
-src/obj/render.c.obj \
+src/obj/input.S.obj \
 src/obj/common.c.obj \
-src/obj/input.s.obj \
-src/obj/draw.s.obj \
-src/obj/timer.s.obj \
+src/obj/timer.S.obj \
+src/obj/render.c.obj \
 
 .PHONY: all clean
-.SUFFIXES: .obj .c. .s
+.SUFFIXES: .obj .c. .S
 
 all: $(OBJS)
-	$(LD) $(LDFLAGS) name bin/a.exe file { $(OBJS) }
+	$(LD) $(LDFLAGS) -o bin/a.exe $(OBJS)
 
 src/obj/%.c.obj: src/%.c
-	$(CC) $(CFLAGS) -fo=$@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-src/obj/%.s.obj: src/%.s
-	$(AS) -fo=$@ $<
+src/obj/%.S.obj: src/%.S
+	$(AS) -c -o $@ $<
 
 clean:
 	rm -f src/obj/* *.err

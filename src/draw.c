@@ -15,12 +15,15 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <dos.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <dpmi.h>
+#include <go32.h>
+#include <sys/farptr.h>
 
 #include "graphics.h"
 #include "common.h"
@@ -35,7 +38,7 @@ void circle(int x, int y, int radius, uint8_t color);
 uint8_t *loadimage(const char *path, int w, int h);
 void drawimage(uint8_t *image, int w, int h, int x, int y);
 
-extern uint8_t * VBUF;
+extern uint8_t *VBUF;
 
 float SIN[360];
 float COS[360];
@@ -57,12 +60,12 @@ init_tables()
 void
 vga_mode(uint8_t mode)
 {
-	union REGS regs;
-	regs.w.ax = mode;
-	int386(0x10, &regs, &regs);
+	__dpmi_regs r;
+	r.x.ax = mode;
+	__dpmi_int(0x10, &r);
 }
 
-void
+void inline
 pixel(int x, int y, uint8_t color)
 {
 	if (x >= 0 && x < 320 && y >= 0 && y < 200)
@@ -109,6 +112,7 @@ line(int x1, int y1, int x2, int y2, uint8_t color)
 	}
 }
 
+/*
 void
 polygon(int *vertices, int n, uint8_t color)
 {
@@ -182,7 +186,7 @@ circle(int x, int y, int radius, uint8_t color)
 		dy = (int)((radius * SIN_ACOS[(int)(n >> 6)]) >> 16);
 	}
 }
-
+*/
 
 uint8_t *
 loadimage(const char *path, int w, int h)
@@ -194,7 +198,6 @@ loadimage(const char *path, int w, int h)
 	if (image == NULL)
 		return NULL;
 
-	/* TODO: DETERMINE FILE SIZE */
 
 	mem = (uint8_t *)malloc(w * h);
 	if (mem == NULL)

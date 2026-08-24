@@ -1,58 +1,56 @@
-; Keyboard IRQ handler
-; Copyright (C) 2026 https://github.com/steelytran
-; 
-; This program is free software: you can redistribute it and/or modify
-; it under the terms of the GNU General Public License as published by
-; the Free Software Foundation, either version 3 of the License, or
-; (at your option) any later version.
-; 
-; This program is distributed in the hope that it will be useful,
-; but WITHOUT ANY WARRANTY; without even the implied warranty of
-; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-; GNU General Public License for more details.
-; 
-; You should have received a copy of the GNU General Public License
-; along with this program.  if not, see <http://www.gnu.org/licenses/>.
+/* keyboard IRQ handler
+ * Copyright (C) 2026 https://github.com/steelytran
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-.386p
-.MODEL FLAT
+.section .data
+.globl _keystate
+_keystate:
+	.fill 128, 1, 0
 
-.DATA
-	PUBLIC _keystate
-	_keystate db 128 dup(0)
+.globl _IRQ1_handler_size
+_IRQ1_handler_size:
+	.long IRQ1_handler_end - _IRQ1_handler
 
-	PUBLIC _IRQ1_handler_size
-	_IRQ1_handler_size dd IRQ1_handler_end - IRQ1_handler_
+.section .text
+.globl _IRQ1_handler
+_IRQ1_handler:
+	pushl %eax
+	pushl %ebx
 
-.CODE
-	PUBLIC IRQ1_handler_
-IRQ1_handler_ PROC
-	push eax
-	push ebx
+	inb $0x60, %al
+	movb %al, %ah
 
-	in al, 60h
-	mov ah, al
+	movb $0x20, %al
+	outb %al, $0x20
 
-	mov al, 20h
-	out 20h, al
+	movzbl %ah, %ebx
+	andl $0x007f, %ebx
 
-	movzx ebx, ah
-	and ebx, 007fh
-
-	test ah, 80h
+	testb $0x80, %ah
 	jnz break
 
 make:
-	mov byte ptr [_keystate + ebx], 1
+	movb $1, _keystate(%ebx)
 	jmp done
 
 break:
-	mov byte ptr [_keystate + ebx], 0
+	movb $0, _keystate(%ebx)
 
 done:
-	pop ebx
-	pop eax
-	iretd
-IRQ1_handler_ ENDP
+	popl %ebx
+	popl %eax
+	iretl
 IRQ1_handler_end:
-	END

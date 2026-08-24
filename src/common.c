@@ -17,44 +17,35 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <dos.h>
+
+#include <dpmi.h>
+#include <go32.h>
 
 #include "common.h"
 
-int
-dpmi_lock_memory(void *p, size_t s)
-{
-	union REGS r;
-	uint32_t addr = (uint8_t)p;
-
-	r.w.ax = 0x0600;
-	r.w.bx = addr >> 16;
-	r.w.cx = addr & 0xFFFF;
-	r.w.si = s >> 16;
-	r.w.di = s & 0xFFFF;
-	int386(0x31, &r, &r);
-
-	return r.w.cflag;
-}
-
-Intvect
-* setvect(uint8_t n, void __interrupt * isr){
+Intvect *
+setvect(uint8_t n, void *isr){
 	Intvect *newp;
+	_go32_dpmi_seginfo newISR;
 
 	newp = (Intvect *)malloc(sizeof(Intvect));
 	if (newp == NULL)
 		return newp;
 
-	newp->n = n;
-	newp->isr = _dos_getvect(n);
+	_go32_dpmi_get_protected_mode_interrupt_vector(n, &newp->isr);
 
-	_dos_setvect(n, isr);
+	newp->n = n;
+
+	newISR.pm_offset = (int)isr;
+	newISR.pm_selector = _go32_my_cs();
+
+	_go32_dpmi_set_protected_mode_interrupt_vector(n, &newISR);
 
 	return newp;
 }
 
-Intvect
-* insertivt(Intvect * list, Intvect * newp) {
+Intvect *
+insertivt(Intvect * list, Intvect * newp) {
 	if (newp == NULL)
 		return newp;
 
@@ -68,8 +59,7 @@ restoreivt(Intvect * ivt)
 	Intvect *nextp;
 
 	while (ivt != NULL) {
-		_dos_setvect(ivt->n, ivt->isr);
-
+		_go32_dpmi_set_protected_mode_interrupt_vector(ivt->n, &ivt->isr);
 		nextp = ivt->next;
 
 		free(ivt);
