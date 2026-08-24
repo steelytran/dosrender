@@ -112,7 +112,6 @@ line(int x1, int y1, int x2, int y2, uint8_t color)
 	}
 }
 
-/*
 void
 polygon(int *vertices, int n, uint8_t color)
 {
@@ -186,7 +185,6 @@ circle(int x, int y, int radius, uint8_t color)
 		dy = (int)((radius * SIN_ACOS[(int)(n >> 6)]) >> 16);
 	}
 }
-*/
 
 uint8_t *
 loadimage(const char *path, int w, int h)
