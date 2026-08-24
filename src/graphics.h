@@ -63,7 +63,6 @@ void drawimage(uint8_t * , int, int, int, int);
 
 Vertex rotate2d(const Vertex *);
 
-extern uint8_t * VGA;
-extern uint8_t * VBUF;
+extern uint8_t *VBUF;
 
 #endif

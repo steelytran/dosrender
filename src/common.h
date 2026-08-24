@@ -18,12 +18,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <dpmi.h>
 #include <stdint.h>
 #include <stddef.h>
 
 #define sgn(x) ((x) < 0 ? - 1 : ((x) > 0 ? 1 : 0))
-
-#define PI 3.14159f
 
 #define FP_FACTOR 12
 #define FP_SCALE (1 << FP_FACTOR)
@@ -31,7 +30,7 @@
 typedef struct Intvect Intvect;
 struct Intvect {
 	uint8_t n;
-	void __interrupt * isr;
+	_go32_dpmi_seginfo isr;
 	Intvect *next;
 };
 
@@ -46,13 +45,12 @@ extern Player pov;
 
 void init_tables(void);
 
-int dpmi_lock_memory(void *, size_t);
-Intvect *setvect(uint8_t, void __interrupt *);
+Intvect *setvect(uint8_t, void *);
 Intvect *insertivt(Intvect *, Intvect *);
 void restoreivt(Intvect *);
 extern Intvect * vect_table;
 
-extern void __interrupt IRQ0_handler(void);
+extern void IRQ0_handler(void);
 extern void init_PIT(uint32_t);
 
 extern volatile uint32_t timer_ms;
