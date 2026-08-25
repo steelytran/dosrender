@@ -20,12 +20,12 @@
 #include "graphics.h"
 #include "common.h"
 
-extern Player pov;
+extern struct Player pov;
 
-Vertex
-rotate2d(const Vertex *v)
+struct Vertex
+rotate2d(const struct Vertex *v)
 {
-	Vertex new = *v;
+	struct Vertex new = *v;
 
 	int32_t dx = (v->x << FP_FACTOR) - pov.x;
 	int32_t dy = (v->y << FP_FACTOR) - pov.y;

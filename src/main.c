@@ -32,7 +32,7 @@
 extern void IRQ1_handler(void);
 extern void IRQ0_handler(void);
 
-Intvect *vect_table = NULL;
+struct Intvect *vect_table = NULL;
 
 extern size_t IRQ1_handler_size;
 extern size_t IRQ0_handler_size;
@@ -42,15 +42,15 @@ extern volatile uint32_t timer_ms;
 
 uint8_t *VBUF = NULL;
 
-Player pov = {0, 0, 0, 0};
+struct Player pov = {0, 0, 0, 0};
 
 int
 main(void)
 {
 	int status = 0;
 	uint8_t *image = NULL;
-	Vertex triangle_s[3];
-	Vertex triangle[] = {
+	struct Vertex triangle_s[3];
+	struct Vertex triangle[] = {
 		{30, 50, 0},
 		{10, 190, 0},
 		{270, 60, 0}
@@ -93,7 +93,7 @@ main(void)
 	}
 
 	init_tables();
-	init_PIT(18643);	/* ~64hz */
+	init_PIT(18643); /* ~64hz */
 	vga_mode(0x13);
 
 	while (!keystate[K_ESC]) {
@@ -149,8 +149,7 @@ main(void)
 			WHITE
 		);
 
-		pixel(160, 100, CYAN);
-
+		/* vsync */
 		while (inportb(0x03da) & 0x08);
 		while (!(inportb(0x03da) & 0x08));
 

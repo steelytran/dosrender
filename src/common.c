@@ -23,12 +23,12 @@
 
 #include "common.h"
 
-Intvect *
+struct Intvect *
 setvect(uint8_t n, void *isr){
-	Intvect *newp;
+	struct Intvect *newp;
 	_go32_dpmi_seginfo newISR;
 
-	newp = (Intvect *)malloc(sizeof(Intvect));
+	newp = (struct Intvect *)malloc(sizeof(struct Intvect));
 	if (newp == NULL)
 		return newp;
 
@@ -44,8 +44,8 @@ setvect(uint8_t n, void *isr){
 	return newp;
 }
 
-Intvect *
-insertivt(Intvect * list, Intvect * newp) {
+struct Intvect *
+insertivt(struct Intvect * list, struct Intvect * newp) {
 	if (newp == NULL)
 		return newp;
 
@@ -54,9 +54,9 @@ insertivt(Intvect * list, Intvect * newp) {
 }
 
 void
-restoreivt(Intvect * ivt)
+restoreivt(struct Intvect * ivt)
 {
-	Intvect *nextp;
+	struct Intvect *nextp;
 
 	while (ivt != NULL) {
 		_go32_dpmi_set_protected_mode_interrupt_vector(ivt->n, &ivt->isr);

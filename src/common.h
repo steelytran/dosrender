@@ -27,28 +27,27 @@
 #define FP_FACTOR 12
 #define FP_SCALE (1 << FP_FACTOR)
 
-typedef struct Intvect Intvect;
 struct Intvect {
 	uint8_t n;
 	_go32_dpmi_seginfo isr;
-	Intvect *next;
+	struct Intvect *next;
 };
 
-typedef struct {
+struct Player {
 	int32_t x;
 	int32_t y;
 	int32_t z;
 	int32_t angle;
-} Player;
+};
 
-extern Player pov;
+extern struct Player pov;
 
 void init_tables(void);
 
-Intvect *setvect(uint8_t, void *);
-Intvect *insertivt(Intvect *, Intvect *);
-void restoreivt(Intvect *);
-extern Intvect * vect_table;
+struct Intvect *setvect(uint8_t, void *);
+struct Intvect *insertivt(struct Intvect *, struct Intvect *);
+void restoreivt(struct Intvect *);
+extern struct Intvect * vect_table;
 
 extern void IRQ0_handler(void);
 extern void init_PIT(uint32_t);

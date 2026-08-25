@@ -65,7 +65,7 @@ vga_mode(uint8_t mode)
 	__dpmi_int(0x10, &r);
 }
 
-void inline
+void
 pixel(int x, int y, uint8_t color)
 {
 	if (x >= 0 && x < 320 && y >= 0 && y < 200)
@@ -89,8 +89,10 @@ line(int x1, int y1, int x2, int y2, uint8_t color)
 
 	pixel(x, y, color);
 
+/* TODO: clip line before plotting instead of checking with every single pixel */
+
 	if (u_dx >= u_dy) {
-		for (i = 0; i < u_dx; i++) {
+		for (i = u_dx; i; i--) {
 			py += u_dy;
 			if (py >= u_dx) {
 				py -= u_dx;
@@ -100,7 +102,7 @@ line(int x1, int y1, int x2, int y2, uint8_t color)
 			pixel(x, y, color);
 		}
 	} else {
-		for (i = 0; i < u_dy; i++) {
+		for (i = u_dy; i; i--) {
 			px += u_dx;
 			if (px >= u_dy) {
 				px -= u_dy;
@@ -117,7 +119,7 @@ polygon(int *vertices, int n, uint8_t color)
 {
 	int i;
 	int x1, y1, x2, y2;
-	for (i = 0; i < n - 1; i++) {
+	for (i = n - 1; i; i--) {
 		x1 = vertices[0 + (i << 1)];
 		y1 = vertices[1 + (i << 1)];
 		x2 = vertices[2 + (i << 1)];
@@ -149,7 +151,7 @@ rect(int x1, int y1, int x2, int y2, uint8_t color)
 	x[1] = x2;
 	y[1] = y2;
 
-	for (i = 0; i < 2; i++) {
+	for (i = 2; i; i--) {
 
 		for (j = 0; j <= u_dx; j++)
 			pixel(x[0] - (j * sgn_x), y[i], color);
@@ -170,7 +172,7 @@ circle(int x, int y, int radius, uint8_t color)
 	dy = radius - 1;
 	offset = (y << 8) + (y << 6) + x;
 
-	for (dx = 0; dx <= dy; dx++) {
+	for (dx = dy; dx; dx--) {
 		dxoffset = (dx << 8) + (dx << 6);
 		dyoffset = (dy << 8) + (dy << 6);
 		VBUF[offset + dy - dxoffset] = color;
@@ -229,6 +231,7 @@ drawimage(uint8_t *image, int w, int h, int x, int y)
 		h += y;
 		y = 0;
 	}
+
 	if (x + w >= SCREEN_WIDTH)
 		w = SCREEN_WIDTH - x;
 
@@ -237,7 +240,7 @@ drawimage(uint8_t *image, int w, int h, int x, int y)
 
 	screen = &VBUF[(y << 8) + (y << 6) + x];
 
-	for (i = 0; i < h; i++) {
+	for (i = h; i; i--) {
 		memcpy(screen, image, w);
 		screen += SCREEN_WIDTH;
 		image += original_w;

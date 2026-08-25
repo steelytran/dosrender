@@ -42,11 +42,11 @@ enum {
 	WHITE
 };
 
-typedef struct {
+struct Vertex {
 	int32_t x;
 	int32_t y;
 	int32_t z;
-} Vertex;
+};
 
 extern void wait_for_vsync(void);
 extern void clearbuffer(uint8_t *);
@@ -61,7 +61,7 @@ void circle(int, int, int, uint8_t);
 uint8_t *loadimage(const char * , int, int);
 void drawimage(uint8_t * , int, int, int, int);
 
-Vertex rotate2d(const Vertex *);
+struct Vertex rotate2d(const struct Vertex *);
 
 extern uint8_t *VBUF;
 

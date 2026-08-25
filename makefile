@@ -4,7 +4,7 @@ CC = $(DJGPP)-gcc
 AS = $(DJGPP)-gcc
 LD = $(DJGPP)-gcc
 
-CFLAGS = -O1
+CFLAGS = -O2 -Wall -ffast-math
 LDFLAGS =
 
 OBJS =\
